@@ -50,13 +50,18 @@ def make_user_profile(n_users: int = 100) -> pl.DataFrame:
     })
 
 
-def make_item_popularity(n_items: int = 1000) -> pl.DataFrame:
+def make_item_popularity() -> pl.DataFrame:
+    corpus_path = REPO_ROOT / "data" / "corpus_vn.jsonl"
+    corpus = pl.read_ndjson(corpus_path)
+    doc_ids = corpus.get_column("doc_id").to_list()
+    assert len(doc_ids) == 1000, f"Expected 1000 corpus documents, got {len(doc_ids)}"
+    assert len(set(doc_ids)) == 1000, "Corpus doc_id values must be unique"
     return pl.DataFrame({
-        "doc_id": [f"item_{i:04d}" for i in range(n_items)],
-        "click_count_24h": [(i * 13) % 500 for i in range(n_items)],
-        "ctr_7d": [round(((i * 7) % 100) / 100.0, 3) for i in range(n_items)],
-        "avg_dwell_seconds": [10.0 + (i * 0.7) % 90 for i in range(n_items)],
-        "event_timestamp": [NOW - timedelta(minutes=i % 720) for i in range(n_items)],
+        "doc_id": doc_ids,
+        "click_count_24h": [(i * 13) % 500 for i in range(len(doc_ids))],
+        "ctr_7d": [round(((i * 7) % 100) / 100.0, 3) for i in range(len(doc_ids))],
+        "avg_dwell_seconds": [10.0 + (i * 0.7) % 90 for i in range(len(doc_ids))],
+        "event_timestamp": [NOW - timedelta(minutes=i % 720) for i in range(len(doc_ids))],
     })
 
 
@@ -70,7 +75,12 @@ def make_query_velocity(n_users: int = 100) -> pl.DataFrame:
 
 
 make_user_profile().write_parquet(FEAST_DATA / "user_profile.parquet")
-make_item_popularity().write_parquet(FEAST_DATA / "item_popularity.parquet")
+item_popularity = make_item_popularity()
+assert item_popularity.get_column("doc_id").n_unique() == 1000
+assert set(item_popularity.get_column("doc_id")) == set(
+    pl.read_ndjson(REPO_ROOT / "data" / "corpus_vn.jsonl").get_column("doc_id")
+)
+item_popularity.write_parquet(FEAST_DATA / "item_popularity.parquet")
 make_query_velocity().write_parquet(FEAST_DATA / "query_velocity.parquet")
 print(f"Wrote 3 Parquet sources to {FEAST_DATA}")
 for p in sorted(FEAST_DATA.glob("*.parquet")):
@@ -96,15 +106,17 @@ if res.stderr:
 assert res.returncode == 0, f"feast apply failed: {res.stderr}"
 
 # %% [markdown]
-# ## 3. `feast materialize-incremental` — load offline → online
+# ## 3. `feast materialize` — load offline → online
 #
+# Dữ liệu snapshot được sinh lại mỗi lần chạy; materialize toàn cửa sổ
+# để tránh incremental watermark bỏ qua các hàng có timestamp cũ.
 # Feast scan offline store cho mọi sự kiện đến `now`, ghi giá trị mới nhất
 # (per entity_key) vào online store. SQLite trong lite path; Redis trong docker path.
 
 # %%
 end_dt = NOW.strftime("%Y-%m-%dT%H:%M:%S")
 res = subprocess.run(
-    ["feast", "materialize-incremental", end_dt],
+    ["feast", "materialize", (NOW - timedelta(days=31)).strftime("%Y-%m-%dT%H:%M:%S"), end_dt],
     cwd=str(FEAST_DIR),
     capture_output=True, text=True, check=False,
 )
@@ -128,26 +140,41 @@ from feast import FeatureStore
 
 fs = FeatureStore(repo_path=str(FEAST_DIR))
 
+EXPECTED_FEATURE_VIEWS = {
+    "user_profile_features",
+    "item_popularity_features",
+    "query_velocity_features",
+}
+registered_feature_views = fs.list_feature_views()
+registered_feature_view_names = {view.name for view in registered_feature_views}
+print("Registered feature views:", sorted(registered_feature_view_names))
+assert registered_feature_view_names == EXPECTED_FEATURE_VIEWS
+
 REQUEST_FEATURES = [
     "user_profile_features:reading_speed_wpm",
     "user_profile_features:preferred_language",
     "user_profile_features:topic_affinity",
     "query_velocity_features:queries_last_hour",
     "query_velocity_features:distinct_topics_24h",
+    "item_popularity_features:click_count_24h",
+    "item_popularity_features:ctr_7d",
+    "item_popularity_features:avg_dwell_seconds",
 ]
 
 # Single lookup
 t0 = time.perf_counter()
 features = fs.get_online_features(
     features=REQUEST_FEATURES,
-    entity_rows=[{"user_id": "u_001"}],
+    entity_rows=[{"user_id": "u_001", "doc_id": "cloud_001"}],
 ).to_dict()
 single_latency_ms = (time.perf_counter() - t0) * 1000
 print(f"Single lookup: {single_latency_ms:.2f}ms")
 print({k: v[0] for k, v in features.items()})
+assert features["reading_speed_wpm"][0] is not None
+assert features["click_count_24h"][0] is not None
 
 # %% [markdown]
-# ## 5. TODO — Batch latency benchmark (100 lookups, P99)
+# ## 5. Batch latency benchmark (100 lookups, P99)
 
 # %%
 latencies: list[float] = []
@@ -156,7 +183,7 @@ for i in range(100):
     t0 = time.perf_counter()
     fs.get_online_features(
         features=REQUEST_FEATURES,
-        entity_rows=[{"user_id": user_id}],
+        entity_rows=[{"user_id": user_id, "doc_id": "cloud_001"}],
     ).to_dict()
     latencies.append((time.perf_counter() - t0) * 1000)
 
@@ -185,7 +212,7 @@ else:
 import pandas as pd
 entity_df = pd.DataFrame({
     "user_id": ["u_001", "u_002", "u_003"],
-    "event_timestamp": [NOW - timedelta(hours=2), NOW - timedelta(hours=1), NOW],
+    "event_timestamp": [NOW - timedelta(minutes=30), NOW - timedelta(hours=1), NOW],
 })
 
 historical = fs.get_historical_features(
@@ -196,6 +223,19 @@ historical = fs.get_historical_features(
     ],
 ).to_df()
 print(historical)
+assert historical.shape == (3, 4), f"Unexpected PIT result shape: {historical.shape}"
+# A request before the first profile event must never receive a future value.
+before_event = pd.DataFrame({
+    "user_id": ["u_001"],
+    "event_timestamp": [NOW - timedelta(hours=2)],
+})
+early = fs.get_historical_features(
+    entity_df=before_event,
+    features=["user_profile_features:reading_speed_wpm"],
+).to_df()
+print("Before first profile event (Feast file store may omit unmatched rows):")
+print(early)
+assert early.empty or early["reading_speed_wpm"].isna().all()
 
 # %% [markdown]
 # ## Deliverable evidence
