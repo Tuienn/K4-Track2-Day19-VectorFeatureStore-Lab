@@ -15,8 +15,12 @@
 
 # %%
 import _setup  # noqa: F401
+import atexit
+import json
+import socket
 import statistics
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -30,40 +34,75 @@ import httpx
 
 # %%
 ROOT = Path(_setup.__file__).resolve().parent.parent
+
+
+def free_local_port() -> int:
+    """Ask the OS for an available local port for this short-lived server."""
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+PORT = free_local_port()
 proc = subprocess.Popen(
-    ["uvicorn", "app.main:app", "--port", "8000", "--log-level", "warning"],
+    [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1",
+     "--port", str(PORT), "--log-level", "warning"],
     cwd=str(ROOT),
 )
 
-# Đợi server up + warm (Searcher.from_corpus loads embeddings + indexes 1000 docs)
-URL = "http://localhost:8000"
-for _ in range(60):
-    try:
-        r = httpx.get(f"{URL}/healthz", timeout=2.0)
-        if r.status_code == 200 and r.json().get("ready"):
-            break
-    except httpx.HTTPError:
-        pass
-    time.sleep(1)
-else:
-    raise RuntimeError("API didn't become ready within 60s")
 
-print(httpx.get(f"{URL}/healthz").json())
+def stop_server() -> None:
+    if proc.poll() is None:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=5)
+
+
+atexit.register(stop_server)
+client = httpx.Client(timeout=5.0)
+
+# Đợi server up + warm (Searcher.from_corpus loads embeddings + indexes 1000 docs)
+URL = f"http://127.0.0.1:{PORT}"
+try:
+    for _ in range(300):
+        if proc.poll() is not None:
+            raise RuntimeError(f"API process exited during startup (exit code {proc.returncode})")
+        try:
+            r = client.get(f"{URL}/healthz", timeout=2.0)
+            r.raise_for_status()
+            if r.status_code == 200 and r.json().get("ready"):
+                break
+        except httpx.HTTPError:
+            pass
+        time.sleep(1)
+    else:
+        raise RuntimeError("API didn't become ready within 300s")
+except BaseException:
+    client.close()
+    stop_server()
+    raise
+
+print(client.get(f"{URL}/healthz").json())
 
 # %% [markdown]
 # ## 2. Single query — kiểm tra response shape
 
 # %%
-r = httpx.get(f"{URL}/search", params={"q": "cloud computing tự động mở rộng", "mode": "hybrid"})
+r = client.get(f"{URL}/search", params={"q": "cloud computing tự động mở rộng", "mode": "hybrid"})
 r.raise_for_status()
 body = r.json()
+print("Full SearchResponse:")
+print(json.dumps(body, ensure_ascii=False, indent=2))
 print(f"latency_ms: {body['latency_ms']:.1f}")
 print(f"top-3 hits:")
 for h in body["hits"][:3]:
     print(f"  {h['doc_id']:>14}  score={h['score']:.4f}  {h['title']}")
 
 # %% [markdown]
-# ## 3. TODO — Latency benchmark (100 queries × 3 modes)
+# ## 3. Latency benchmark (100 queries × 3 modes)
 #
 # Dùng 50 golden queries × 2 reps = 100 calls/mode. Ghi nhận latency từ
 # `body["latency_ms"]` (server-side, đã trừ network) HOẶC từ wall-clock httpx
@@ -72,8 +111,6 @@ for h in body["hits"][:3]:
 # Output: bảng P50/P95/P99 cho 3 mode.
 
 # %%
-import json
-
 DATA = ROOT / "data"
 golden = [json.loads(l) for l in (DATA / "golden_set.jsonl").open(encoding="utf-8")]
 
@@ -88,10 +125,15 @@ def percentile(values: list[float], p: float) -> float:
 def benchmark_mode(mode: str, reps: int = 2) -> dict[str, float]:
     server_latencies: list[float] = []
     wall_latencies: list[float] = []
+    # Warm the route and selected retrieval mode before recording samples.
+    for q in golden[:10]:
+        warm = client.get(f"{URL}/search", params={"q": q["query"], "mode": mode})
+        warm.raise_for_status()
     for _ in range(reps):
         for q in golden:
             t0 = time.perf_counter()
-            r = httpx.get(f"{URL}/search", params={"q": q["query"], "mode": mode})
+            r = client.get(f"{URL}/search", params={"q": q["query"], "mode": mode})
+            r.raise_for_status()
             wall_latencies.append((time.perf_counter() - t0) * 1000)
             server_latencies.append(r.json()["latency_ms"])
     return {
@@ -127,8 +169,9 @@ else:
 # ## 5. Cleanup — stop the API server
 
 # %%
-proc.terminate()
-proc.wait(timeout=5)
+client.close()
+stop_server()
+atexit.unregister(stop_server)
 print("API server stopped")
 
 # %% [markdown]
