@@ -22,7 +22,7 @@ import json
 import statistics
 from pathlib import Path
 
-from fastembed import TextEmbedding
+from app.embeddings import Embedder
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from rank_bm25 import BM25Okapi
@@ -40,11 +40,11 @@ tokenized = [(d["title"] + " " + d["text"]).lower().split() for d in docs]
 bm25 = BM25Okapi(tokenized)
 
 # Vector
-embedder = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+embedder = Embedder()
 client = QdrantClient(":memory:")
 client.create_collection(
     collection_name="lab19",
-    vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+    vectors_config=VectorParams(size=embedder.dim, distance=Distance.COSINE),
 )
 BATCH = 64
 points = []
@@ -58,7 +58,7 @@ for start in range(0, len(docs), BATCH):
             payload={"doc_id": d["doc_id"], "topic": d["topic"]},
         ))
 client.upsert(collection_name="lab19", points=points)
-print(f"BM25 + vector indices ready ({len(docs)} docs)")
+print(f"BM25 + vector indices ready ({len(docs)} docs), {embedder.model_name} / {embedder.dim}d")
 
 # %% [markdown]
 # ## 2. Per-mode search functions
@@ -81,7 +81,7 @@ def search_semantic(query: str, top_k: int = TOP_K) -> list[str]:
 
 
 # %% [markdown]
-# ## 3. TODO — implement Reciprocal Rank Fusion
+# ## 3. Reciprocal Rank Fusion
 #
 # Công thức (deck §3):
 #
@@ -100,7 +100,7 @@ def search_hybrid(query: str, top_k: int = TOP_K, rrf_k: int = RRF_K) -> list[st
     kw_ids = search_keyword(query, depth)
     sem_ids = search_semantic(query, depth)
 
-    # TODO: implement RRF fusion below.
+    # Fuse both rankings with the same 1-based formula.
     # Hint: dict[doc_id, float] cộng 1/(rrf_k + rank) từ mỗi retriever.
     # rank starts at 1, not 0.
     rrf: dict[str, float] = {}

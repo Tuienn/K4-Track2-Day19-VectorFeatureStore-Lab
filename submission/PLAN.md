@@ -25,7 +25,7 @@ dụng Searcher đã dựng lúc startup, đo riêng thời gian server bằng p
 Benchmark warm-up trước khi lấy mẫu; không cache câu trả lời để làm đẹp latency.
 
 Luồng feature: ba nguồn Parquet → Feast registry → materialize → SQLite →
-online lookup. TTL profile 30 ngày, popularity 2 ngày, velocity 1 giờ theo
+online lookup. TTL profile 30 ngày, popularity 24 giờ, velocity 1 giờ theo
 definitions hiện có. Historical join dùng timestamp của entity để không đọc
 feature tương lai. NB8 dùng registry riêng cho on-demand feature view.
 
