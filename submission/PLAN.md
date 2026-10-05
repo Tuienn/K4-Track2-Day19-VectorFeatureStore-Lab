@@ -52,3 +52,10 @@ feature engineering đo leakage sau khi split và so PIT với latest join.
 review diff và lỗi notebook trước commit. Generated corpus/registry/model
 không commit. Thông tin tên học viên còn thiếu sẽ để ghi rõ chưa cung cấp.
 Kết quả latency là đơn luồng trên máy hiện tại, không suy ra SLA production.
+
+## Trạng thái hoàn thành
+
+Cả 5 checkpoint hoàn thành tại máy local. NB1–NB8 đã chạy, 47 tests và
+smoke Lite pass, benchmark 5000 calls/mode pass. Mỗi notebook có PNG/HTML
+output evidence. Reflection 169 từ đã điền tên Nguyễn Ngọc Tuyền và mã
+2A202603010. Xem `RESULTS.md` để biết hạn chế paraphrase và phạm vi chưa chạy.

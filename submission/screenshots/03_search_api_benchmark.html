@@ -1,0 +1,88 @@
+<!doctype html><html lang="vi"><meta charset="utf-8">
+<title>03 search api benchmark</title><style>
+body{margin:0;padding:32px;background:#fff;color:#17212b;font:16px sans-serif}
+h1{font-size:24px}h2{font-size:14px;color:#526170;margin:0 0 12px}
+section{border-top:1px solid #cbd2d9;padding:18px 0}
+pre{font:14px/1.5 monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.source{color:#526170;font-size:13px;margin-bottom:28px}
+</style><h1>Lab 19 · 03 search api benchmark</h1>
+<p class="source">Actual saved outputs: notebooks/03_search_api_benchmark.ipynb. Lite / CPU.<br>
+Browser capture of exported notebook outputs; stderr warnings omitted.</p>
+<section><h2>Output [2]</h2><pre>{&#x27;ready&#x27;: True, &#x27;n_docs&#x27;: 1000}</pre></section><section><h2>Output [3]</h2><pre>Full SearchResponse:
+{
+  &quot;query&quot;: &quot;cloud computing tự động mở rộng&quot;,
+  &quot;mode&quot;: &quot;hybrid&quot;,
+  &quot;top_k&quot;: 10,
+  &quot;latency_ms&quot;: 11.274149997916538,
+  &quot;hits&quot;: [
+    {
+      &quot;doc_id&quot;: &quot;cloud_016&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Theo khuyến nghị 2026, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm cloud, serverless, AWS. Khái niệm hạ tầng và không máy chủ là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với cloud và AWS.&quot;,
+      &quot;score&quot;: 0.03252247488101534
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_072&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Theo khuyến nghị 2026, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm cloud, Azure, Kubernetes. Khái niệm triển khai và đám mây là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với cloud và Kubernetes.&quot;,
+      &quot;score&quot;: 0.032266458495966696
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_053&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Để tối ưu chi phí, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm AWS, auto-scaling, cloud. Khái niệm tự động mở rộng và triển khai là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với AWS và cloud.&quot;,
+      &quot;score&quot;: 0.0315136476426799
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_029&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Tại các doanh nghiệp công nghệ Việt Nam, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm cloud, Lambda, serverless. Khái niệm triển khai và không máy chủ là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với cloud và serverless.&quot;,
+      &quot;score&quot;: 0.030776515151515152
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_040&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Trong môi trường production hiện đại, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm multi-tenant, Kubernetes, AWS. Khái niệm đám mây và triển khai là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với multi-tenant và AWS.&quot;,
+      &quot;score&quot;: 0.029910714285714284
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_045&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Để tối ưu chi phí, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm Kubernetes, serverless, auto-scaling. Khái niệm triển khai và không máy chủ là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với Kubernetes và auto-scaling.&quot;,
+      &quot;score&quot;: 0.02919863597612958
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_087&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Trong môi trường production hiện đại, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm serverless, container, AWS. Khái niệm đa người dùng và không máy chủ là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với serverless và AWS.&quot;,
+      &quot;score&quot;: 0.026709401709401708
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_000&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Trong môi trường production hiện đại, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm cloud, GCP, Azure. Khái niệm không máy chủ và hạ tầng là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với cloud và Azure.&quot;,
+      &quot;score&quot;: 0.02607709750566893
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_091&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tự động mở rộng theo lưu lượng&quot;,
+      &quot;text&quot;: &quot;Khi triển khai ở quy mô lớn, điện toán đám mây đòi hỏi phải tự động mở rộng theo lưu lượng. Các công cụ phổ biến gồm Azure, multi-tenant, cloud. Khái niệm triển khai và không máy chủ là nền tảng quan trọng. Bài viết này giải thích cách tự động mở rộng theo lưu lượng một cách thực tế, kèm ví dụ minh hoạ với Azure và cloud.&quot;,
+      &quot;score&quot;: 0.026013513513513515
+    },
+    {
+      &quot;doc_id&quot;: &quot;cloud_039&quot;,
+      &quot;title&quot;: &quot;Điện toán đám mây: tách biệt môi trường dev và prod&quot;,
+      &quot;text&quot;: &quot;Trong môi trường production hiện đại, điện toán đám mây đòi hỏi phải tách biệt môi trường dev và prod. Các công cụ phổ biến gồm cloud, auto-scaling, multi-tenant. Khái niệm hạ tầng và tự động mở rộng là nền tảng quan trọng. Bài viết này giải thích cách tách biệt môi trường dev và prod một cách thực tế, kèm ví dụ minh hoạ với cloud và multi-tenant.&quot;,
+      &quot;score&quot;: 0.024695121951219513
+    }
+  ]
+}
+latency_ms: 11.3
+top-3 hits:
+       cloud_016  score=0.0325  Điện toán đám mây: tự động mở rộng theo lưu lượng
+       cloud_072  score=0.0323  Điện toán đám mây: tự động mở rộng theo lưu lượng
+       cloud_053  score=0.0315  Điện toán đám mây: tự động mở rộng theo lưu lượng</pre></section><section><h2>Output [4]</h2><pre>mode            P50      P95      P99  P99(wall)
+  keyword       1.9ms    2.8ms    3.4ms      6.2ms
+  semantic     10.1ms   13.7ms   15.0ms     18.0ms
+  hybrid       13.4ms   17.7ms   20.7ms     23.8ms</pre></section><section><h2>Output [5]</h2><pre>Hybrid P99 server-side: 20.7ms
+PASS — hybrid P99 &lt; 50ms (20.7ms)</pre></section><section><h2>Output [6]</h2><pre>API server stopped</pre></section></html>

@@ -1,0 +1,24 @@
+[0;93m2026-10-06 00:09:34.278444143 [W:onnxruntime:Default, telemetry.cc:800 operator()] Failed to persist telemetry device ID; using an in-memory identifier[m
+Day 19 benchmark — keyword vs semantic vs hybrid
+==============================================================
+  Loaded 50 golden queries
+  Building Searcher (this may take ~30s on first run — embedding the corpus)...
+  Indexed 1000 docs in 56.1s
+
+Quality — Precision@10 (% of top-10 in matching topic)
+  Keyword (BM25)   :  77.8%
+  Semantic (vector):  73.2%
+  Hybrid  (RRF=60) :  78.6%   <- should win
+
+Quality by query type:
+  type           n       kw     sem     hyb
+  exact         15   96.7%  88.7%  96.7%
+  paraphrase    15   33.3%  24.0%  32.0%
+  mixed         20   97.0%  98.5% 100.0%
+
+Latency — P50 / P95 / P99 over 5000 calls/mode
+  keyword  : P50=   1.2ms  P95=   1.7ms  P99=   2.1ms
+  semantic : P50=   8.4ms  P95=  11.3ms  P99=  13.3ms
+  hybrid   : P50=  11.2ms  P95=  15.0ms  P99=  17.7ms
+
+PASS — hybrid beats keyword by +0.8pp, semantic by +5.4pp

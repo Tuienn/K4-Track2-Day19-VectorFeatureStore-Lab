@@ -1,0 +1,143 @@
+<!doctype html><html lang="vi"><meta charset="utf-8">
+<title>04 feast feature store</title><style>
+body{margin:0;padding:32px;background:#fff;color:#17212b;font:16px sans-serif}
+h1{font-size:24px}h2{font-size:14px;color:#526170;margin:0 0 12px}
+section{border-top:1px solid #cbd2d9;padding:18px 0}
+pre{font:14px/1.5 monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.source{color:#526170;font-size:13px;margin-bottom:28px}
+</style><h1>Lab 19 · 04 feast feature store</h1>
+<p class="source">Actual saved outputs: notebooks/04_feast_feature_store.ipynb. Lite / CPU.<br>
+Browser capture of exported notebook outputs; stderr warnings omitted.</p>
+<section><h2>Output [2]</h2><pre>Wrote 3 Parquet sources to /home/tuienn/User/VinAI/Labs/2026-10-05/K4-Track2-Day19-VectorFeatureStore-Lab/app/feast_repo/data
+  item_popularity.parquet  12.0 KB
+  query_velocity.parquet  2.3 KB
+  user_profile.parquet  2.8 KB</pre></section><section><h2>Output [3]</h2><pre>STDOUT:
+No project found in the repository. Using project name lab19 defined in feature_store.yaml
+Applying changes for project lab19
+Updated feature view user_profile_features
+	batch_source: type: BATCH_FILE
+timestamp_field: &quot;event_timestamp&quot;
+file_options {
+  uri: &quot;/home/tuienn/User/VinAI/Labs/2026-10-05/K4-Track2-Day19-VectorFeatureStore-Lab/app/feast_repo/data/user_profile.parquet&quot;
+}
+data_source_class_type: &quot;feast.infra.offline_stores.file_source.FileSource&quot;
+name: &quot;user_profile_source&quot;
+meta {
+  created_timestamp {
+    seconds: 1791219854
+    nanos: 532004000
+  }
+  last_updated_timestamp {
+    seconds: 1791219854
+    nanos: 532004000
+  }
+}
+ -&gt; type: BATCH_FILE
+timestamp_field: &quot;event_timestamp&quot;
+file_options {
+  uri: &quot;/home/tuienn/User/VinAI/Labs/2026-10-05/K4-Track2-Day19-VectorFeatureStore-Lab/app/feast_repo/data/user_profile.parquet&quot;
+}
+data_source_class_type: &quot;feast.infra.offline_stores.file_source.FileSource&quot;
+name: &quot;user_profile_source&quot;
+meta {
+  created_timestamp {
+    seconds: 1791219956
+    nanos: 187333000
+  }
+  last_updated_timestamp {
+    seconds: 1791219956
+    nanos: 187333000
+  }
+}
+
+Updated feature view query_velocity_features
+	batch_source: type: BATCH_FILE
+timestamp_field: &quot;event_timestamp&quot;
+file_options {
+  uri: &quot;/home/tuienn/User/VinAI/Labs/2026-10-05/K4-Track2-Day19-VectorFeatureStore-Lab/app/feast_repo/data/query_velocity.parquet&quot;
+}
+data_source_class_type: &quot;feast.infra.offline_stores.file_source.FileSource&quot;
+name: &quot;query_velocity_source&quot;
+meta {
+  created_timestamp {
+    seconds: 1791219854
+    nanos: 532303000
+  }
+  last_updated_timestamp {
+    seconds: 1791219854
+    nanos: 532303000
+  }
+}
+ -&gt; type: BATCH_FILE
+timestamp_field: &quot;event_timestamp&quot;
+file_options {
+  uri: &quot;/home/tuienn/User/VinAI/Labs/2026-10-05/K4-Track2-Day19-VectorFeatureStore-Lab/app/feast_repo/data/query_velocity.parquet&quot;
+}
+data_source_class_type: &quot;feast.infra.offline_stores.file_source.FileSource&quot;
+name: &quot;query_velocity_source&quot;
+meta {
+  created_timestamp {
+    seconds: 1791219956
+    nanos: 187841000
+  }
+  last_updated_timestamp {
+    seconds: 1791219956
+    nanos: 187841000
+  }
+}
+
+Updated feature view item_popularity_features
+	batch_source: type: BATCH_FILE
+timestamp_field: &quot;event_timestamp&quot;
+file_options {
+  uri: &quot;/home/tuienn/User/VinAI/Labs/2026-10-05/K4-Track2-Day19-VectorFeatureStore-Lab/app/feast_repo/data/item_popularity.parquet&quot;
+}
+data_source_class_type: &quot;feast.infra.offline_stores.file_source.FileSource&quot;
+name: &quot;item_popularity_source&quot;
+meta {
+  created_timestamp {
+    seconds: 1791219854
+    nanos: 532165000
+  }
+  last_updated_timestamp {
+    seconds: 1791219854
+    nanos: 532165000
+  }
+}
+ -&gt; type: BATCH_FILE
+timestamp_field: &quot;event_timestamp&quot;
+file_options {
+  uri: &quot;/home/tuienn/User/VinAI/Labs/2026-10-05/K4-Track2-Day19-VectorFeatureStore-Lab/app/feast_repo/data/item_popularity.parquet&quot;
+}
+data_source_class_type: &quot;feast.infra.offline_stores.file_source.FileSource&quot;
+name: &quot;item_popularity_source&quot;
+meta {
+  created_timestamp {
+    seconds: 1791219956
+    nanos: 187605000
+  }
+  last_updated_timestamp {
+    seconds: 1791219956
+    nanos: 187605000
+  }
+}
+
+
+No changes to infrastructure</pre></section><section><h2>Output [4]</h2><pre>Materializing 3 feature views from 2026-09-04 17:05:46+00:00 to 2026-10-05 17:05:46+00:00 into the sqlite online store.
+
+user_profile_features:
+query_velocity_features:
+item_popularity_features:</pre></section><section><h2>Output [5]</h2><pre>Registered feature views: [&#x27;item_popularity_features&#x27;, &#x27;query_velocity_features&#x27;, &#x27;user_profile_features&#x27;]
+Single lookup: 9.54ms
+{&#x27;user_id&#x27;: &#x27;u_001&#x27;, &#x27;doc_id&#x27;: &#x27;cloud_001&#x27;, &#x27;reading_speed_wpm&#x27;: 187, &#x27;topic_affinity&#x27;: &#x27;cloud&#x27;, &#x27;preferred_language&#x27;: &#x27;vi&#x27;, &#x27;queries_last_hour&#x27;: 11, &#x27;distinct_topics_24h&#x27;: 4, &#x27;click_count_24h&#x27;: 1, &#x27;ctr_7d&#x27;: 0.38999998569488525, &#x27;avg_dwell_seconds&#x27;: 63.900001525878906}</pre></section><section><h2>Output [6]</h2><pre>Online lookup latency over 100 calls:
+  P50 = 0.27ms
+  P95 = 0.65ms
+  P99 = 0.81ms
+PASS — online lookup P99 &lt; 10ms (0.81ms)</pre></section><section><h2>Output [7]</h2><pre>user_id           event_timestamp  reading_speed_wpm topic_affinity
+0   u_003 2026-10-05 17:05:46+00:00                201       database
+1   u_002 2026-10-05 16:05:46+00:00                194       security
+2   u_001 2026-10-05 16:35:46+00:00                187          cloud
+Before first profile event (Feast file store may omit unmatched rows):
+Empty DataFrame
+Columns: [user_id, event_timestamp, reading_speed_wpm]
+Index: []</pre></section></html>

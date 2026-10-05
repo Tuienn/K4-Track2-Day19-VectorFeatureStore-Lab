@@ -46,13 +46,14 @@ gen-advanced: ## [both] Generate data for the advanced missions (NB6 + NB8)
 	@$(PY) scripts/gen_spend.py
 
 notebooks: ## [both] Execute ALL notebooks headless (what the grader runs)
-	@$(JUPYTEXT) --to notebook --update notebooks/[0-9]*.py >/dev/null 2>&1 || true
-	@for nb in notebooks/[0-9]*.ipynb; do \
+	@$(JUPYTEXT) --to notebook --update notebooks/[0-9]*.py
+	@status=0; for nb in notebooks/[0-9]*.ipynb; do \
 		printf '%-42s' "$$nb"; \
 		PATH="$(PWD)/$(VENV)/bin:$$PATH" $(VENV)/bin/jupyter nbconvert --to notebook \
 			--execute --inplace "$$nb" --ExecutePreprocessor.timeout=900 \
-			>/dev/null 2>&1 && echo PASS || echo FAIL; \
-	done
+			>"/tmp/lab19-$$(basename "$$nb").log" 2>&1 && echo PASS || \
+			{ echo FAIL; cat "/tmp/lab19-$$(basename "$$nb").log"; status=1; }; \
+	done; exit $$status
 
 clean-lite: ## [lite] Wipe venv + data + Feast registry
 	rm -rf $(VENV) data/corpus_vn.jsonl data/golden_set.jsonl data/qdrant_storage \
